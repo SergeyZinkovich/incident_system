@@ -1,0 +1,6 @@
+/obj/
+/models/
+*.csv
+/.ipynb_checkpoints/
+/.idea
+*.zip
