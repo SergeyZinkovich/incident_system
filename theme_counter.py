@@ -2,6 +2,7 @@ import pandas as pd
 from preprocess_udpipe import done_text
 import numpy as np
 import pickle
+import scipy.spatial.distance as ds
 
 THEME_DICT_FILENAME = 'obj/theme_dict.pkl'
 REPORT_FILENAME = 'report.csv'
@@ -65,7 +66,7 @@ def test(model, dataset_filename):
         id1 = 0
         id2 = 0
         for key, val in theme_dict.items():
-            norm = np.linalg.norm(val - vec)
+            norm = ds.cosine(val, vec)
             if min == -1 or norm < min:
                 min2 = min1
                 id2 = id1

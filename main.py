@@ -5,7 +5,7 @@ DATASET_FILENAME = 'file.csv'
 
 print("=========WITHOUT UPDATE=========\n")
 for size in range(10, 200, 10):
-    train.train(DATASET_FILENAME, size)
+    train.train(DATASET_FILENAME, size, fasttext=True)
     theme_counter.count_theme_dict(train.load_trained_model(), DATASET_FILENAME)
     print(size, " ")
     print(theme_counter.test(train.load_trained_model(), DATASET_FILENAME), "\n")

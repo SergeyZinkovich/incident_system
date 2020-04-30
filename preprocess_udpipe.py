@@ -214,6 +214,8 @@ model = Model.load(udpipe_filename)
 process_pipeline = Pipeline(model, 'tokenize', Pipeline.DEFAULT, Pipeline.DEFAULT, 'conllu')
 
 print('Processing input...', file=sys.stderr)
+
+
 def done_text(text):
 
     res = unify_sym(text.strip())

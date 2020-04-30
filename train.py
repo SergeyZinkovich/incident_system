@@ -14,9 +14,12 @@ def get_data(dataset_filename):
     return map(done_text, data)
 
 
-def train(dataset_filename, size=100):
+def train(dataset_filename, size=100, fasttext=False):
     sentences = get_data(dataset_filename)
-    model = gensim.models.Word2Vec(sentences=sentences, min_count=0, size=size)
+    if fasttext:
+        model = gensim.models.FastText(sentences=sentences, min_count=0, size=size)
+    else:
+        model = gensim.models.Word2Vec(sentences=sentences, min_count=0, size=size)
     model.save(TRAINED_MODEL_FILENAME)
 
 
