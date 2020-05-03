@@ -1,7 +1,7 @@
 import train
 import theme_counter
 
-DATASET_FILENAME = 'file.csv'
+DATASET_FILENAME = 'without_mess.csv'
 
 print("=========WITHOUT UPDATE=========\n")
 for size in range(10, 200, 10):

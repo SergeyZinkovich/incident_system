@@ -6,6 +6,8 @@ import scipy.spatial.distance as ds
 
 THEME_DICT_FILENAME = 'obj/theme_dict.pkl'
 REPORT_FILENAME = 'report.csv'
+PROCESS_FILENAME = 'process.csv'
+DIRECTION_FILENAME = 'direction.csv'
 
 
 def get_data(dataset_filename):
@@ -28,6 +30,8 @@ def count_theme_dict(model, dataset_filename):
     for i in get_data(dataset_filename).values:
         words = done_text(str(i[1]))
         for w in words:
+            if w not in model.wv:
+                continue
             vec = model.wv.get_vector(w)
             if not i[0] in theme_dict:
                 theme_dict[i[0]] = [vec, 1]
@@ -43,15 +47,15 @@ def test(model, dataset_filename):
     theme_dict = load_obj()
 
     correct, wrong = 0, 0
-
-    ans_csv = {"Theme": ["1", "2", "3", "4", "5", "6", "7"]}
-
+    ans = []
     j = 0
 
     for i in get_data(dataset_filename).values:
         words = done_text(str(i[1]))
         vec = 0
         for w in words:
+            if w not in model.wv:
+                continue
             v = model.wv.get_vector(w)
             if vec == 0:
                 vec = [v, 1]
@@ -83,7 +87,7 @@ def test(model, dataset_filename):
                 elif min2 == -1 or norm < min2:
                     min2 = norm
                     id2 = key
-        ans_csv[j] = [i[0], min, id, min1, id1, min2, id2]
+        ans.append([j, i[1], i[0], min, id, min1, id1, min2, id2])
         j += 1
 
         if id == i[0]:
@@ -91,7 +95,23 @@ def test(model, dataset_filename):
         else:
             wrong += 1
 
-    df = pd.DataFrame(ans_csv)
-    df.to_csv(REPORT_FILENAME, index=True, sep=";")
+    save_test_ans(ans)
     return correct / (correct + wrong)
 
+
+def save_test_ans(ans):
+    process_df = pd.read_csv(PROCESS_FILENAME, encoding='utf-8', delimiter=';')
+    process_dict = {}
+    for i in process_df.values:
+        process_dict[i[0]] = i[1]
+
+    direction_df = pd.read_csv(DIRECTION_FILENAME, encoding='utf-8', delimiter=';')
+    direction_dict = {}
+    for i in direction_df.values:
+        direction_dict[i[0]] = i[1]
+    for val in ans:
+        for i in [2, 4, 6, 8]:
+            val[i] = process_dict[int(val[i][:5])] + "/" + direction_dict[int(val[i][6:])]
+    ans.insert(0, [" ", "text", "real theme", "dist1", "theme1", "dist2", "theme2", "dist3", "theme3"])
+    df = pd.DataFrame(ans)
+    df.to_csv(REPORT_FILENAME, index=False, sep=";", encoding='utf-8')
