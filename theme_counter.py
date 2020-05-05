@@ -1,8 +1,9 @@
 import pandas as pd
 from preprocess_udpipe import done_text
-import numpy as np
 import pickle
 import scipy.spatial.distance as ds
+import gensim.models
+from gensim.corpora import Dictionary
 
 THEME_DICT_FILENAME = 'obj/theme_dict.pkl'
 REPORT_FILENAME = 'report.csv'
@@ -25,18 +26,36 @@ def load_obj():
         return pickle.load(f)
 
 
+def eval_tfidf(data):
+    data1 = [done_text(str(d)) for d in data.text]
+    dct = Dictionary(data1)
+    corpus = [dct.doc2bow(line) for line in data1]
+    tfidf = gensim.models.TfidfModel(corpus)
+    dct.save('model_dict.dict')
+    tfidf.save('tfidf_model.model')
+    return dct, tfidf
+
+
+def load_tfidf():
+    dct = Dictionary.load('model_dict.dict')
+    tfidf = gensim.models.TfidfModel.load('tfidf_model.model')
+    return dct, tfidf
+
+
 def count_theme_dict(model, dataset_filename):
+    data = get_data(dataset_filename)
+    dct, tfidf = eval_tfidf(data)
     theme_dict = {}
-    for i in get_data(dataset_filename).values:
+    for i in data.values:
         words = done_text(str(i[1]))
         for w in words:
             if w not in model.wv:
                 continue
             vec = model.wv.get_vector(w)
             if not i[0] in theme_dict:
-                theme_dict[i[0]] = [vec, 1]
+                theme_dict[i[0]] = [vec * tfidf.idfs[dct.token2id[w]], 1]
             else:
-                theme_dict[i[0]] = [theme_dict[i[0]][0] + vec, theme_dict[i[0]][1] + 1]
+                theme_dict[i[0]] = [theme_dict[i[0]][0] + vec * tfidf.idfs[dct.token2id[w]], theme_dict[i[0]][1] + 1]
 
     for key, val in theme_dict.items():
         theme_dict[key] = val[0] / val[1]
@@ -50,6 +69,7 @@ def test(model, dataset_filename):
     ans = []
     j = 0
 
+    dct, tfidf = load_tfidf()
     for i in get_data(dataset_filename).values:
         words = done_text(str(i[1]))
         vec = 0
@@ -58,9 +78,9 @@ def test(model, dataset_filename):
                 continue
             v = model.wv.get_vector(w)
             if vec == 0:
-                vec = [v, 1]
+                vec = [v * tfidf.idfs[dct.token2id[w]], 1]
             else:
-                vec = [vec[0] + v, vec[1] + 1]
+                vec = [vec[0] + v * tfidf.idfs[dct.token2id[w]], vec[1] + 1]
         vec = vec[0]/vec[1]
 
         min = -1
