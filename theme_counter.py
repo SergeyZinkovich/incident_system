@@ -7,6 +7,8 @@ from gensim.corpora import Dictionary
 
 THEME_DICT_FILENAME = 'obj/theme_dict.pkl'
 REPORT_FILENAME = 'report.csv'
+DICTIONARY_FILENAME = 'obj/model_dict.dict'
+TFIDF_MODEL_FILENAME = 'obj/tfidf_model.model'
 PROCESS_FILENAME = 'process.csv'
 DIRECTION_FILENAME = 'direction.csv'
 
@@ -31,14 +33,14 @@ def eval_tfidf(data):
     dct = Dictionary(data1)
     corpus = [dct.doc2bow(line) for line in data1]
     tfidf = gensim.models.TfidfModel(corpus)
-    dct.save('model_dict.dict')
-    tfidf.save('tfidf_model.model')
+    dct.save(DICTIONARY_FILENAME)
+    tfidf.save(TFIDF_MODEL_FILENAME)
     return dct, tfidf
 
 
 def load_tfidf():
-    dct = Dictionary.load('model_dict.dict')
-    tfidf = gensim.models.TfidfModel.load('tfidf_model.model')
+    dct = Dictionary.load(DICTIONARY_FILENAME)
+    tfidf = gensim.models.TfidfModel.load(TFIDF_MODEL_FILENAME)
     return dct, tfidf
 
 
