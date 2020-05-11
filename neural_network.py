@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import keras
 import pickle
+import matplotlib.pyplot as plt
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation, Input
 from preprocess_udpipe import done_text
@@ -77,8 +78,10 @@ def train(w2v_model_vector_size, x, y, theme_dict_len):
     model.compile(loss='sparse_categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
+    print(model.summary())
 
-    model.fit(x_train, y_train, batch_size=128, epochs=1000, validation_data=(x_test, y_test), class_weight='auto')
+    train_history = model.fit(x_train, y_train, batch_size=128, epochs=10, validation_data=(x_test, y_test), class_weight='auto')
+    show_history_plot(train_history)
     model.save(NN_MODEL_FILENAME)
 
 
@@ -97,3 +100,20 @@ def test(x, y):
     score = model.evaluate(x, y, batch_size=128, verbose=1)
     print('total accuracy: ', score[1])
 
+
+def show_history_plot(train_history):
+    plt.plot(train_history.history['accuracy'])
+    plt.plot(train_history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+
+    plt.plot(train_history.history['loss'])
+    plt.plot(train_history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
