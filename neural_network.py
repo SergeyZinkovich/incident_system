@@ -34,19 +34,20 @@ def prepare_data(dataset_filename, w2v_model, dct, tfidf):
             j += 1
             theme_dict[i[0]] = j
         words = done_text(str(i[1]))
-        vec = []
+        vec = np.array([])
         for w in words:
             if w not in w2v_model.wv:
                 continue
-            vec.append(w2v_model.wv.get_vector(w))
-            if len(vec) > 1000:
+            vec = np.concatenate((vec, w2v_model.wv.get_vector(w)))
+            if len(vec) > 100 * w2v_model.vector_size:
                 break
-        if len(vec) > max_words:
-            max_words = len(vec)
+        if len(vec) / w2v_model.vector_size > max_words:
+            max_words = int(len(vec) / w2v_model.vector_size)
+
         x.append(vec)
         y.append(theme_dict[i[0]])
     for i in range(len(x)):
-        x[i] = np.pad(x[i], [(0, max_words - len(x[i])), (0, 0)], 'constant', constant_values=.0)
+        x[i] = np.pad(x[i], (0, int(max_words * w2v_model.vector_size - len(x[i]))), 'constant', constant_values=.0)
     x = np.array(x)
     y = np.array(y)
 
@@ -82,10 +83,9 @@ def train(w2v_model_vector_size, x, y, max_words, theme_dict_len):
     y_test = y[train_size:]
 
     model = Sequential()
-    model.add(Dense(256, input_shape=(max_words, w2v_model_vector_size)))
+    model.add(Dense(256, input_shape=(max_words * w2v_model_vector_size,)))
     model.add(Activation('relu'))
-    model.add(Dropout(0.4))
-    model.add(keras.layers.Flatten())
+    model.add(Dropout(0.5))
     model.add(Dense(theme_dict_len))
     model.add(Activation('softmax'))
     model.compile(loss='sparse_categorical_crossentropy',
