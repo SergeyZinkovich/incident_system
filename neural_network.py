@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation
 from preprocess_udpipe import done_text
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing import sequence
 
 
 TRAIN_TEST_SPLIT = 0.8
@@ -24,34 +26,36 @@ def get_data(dataset_filename):
 def prepare_data(dataset_filename, w2v_model, dct, tfidf):
     data = get_data(dataset_filename)
     theme_dict = {}
-    x = []
     y = []
     j = -1
     max_words = 0
 
-    for i in data.values:
-        if not i[0] in theme_dict:
-            j += 1
-            theme_dict[i[0]] = j
-        words = done_text(str(i[1]))
-        vec = []
-        for w in words:
-            if w not in w2v_model.wv:
-                continue
-            vec.append(w2v_model.wv.get_vector(w))
-            if len(vec) > 1000:
-                break
-        if len(vec) > max_words:
-            max_words = len(vec)
-        x.append(vec)
-        y.append(theme_dict[i[0]])
+    tokenizer = Tokenizer()
+    tokenizer.fit_on_texts(map(done_text, data.text.tolist()))
+
+    x = tokenizer.texts_to_sequences(map(done_text, data.text.tolist()))
+
     for i in range(len(x)):
-        x[i] = np.pad(x[i], [(0, max_words - len(x[i])), (0, 0)], 'constant', constant_values=.0)
+        if len(x[i]) > 1000:
+            x[i] = x[i][:1000]
+        if len(x[i]) > max_words:
+            max_words = len(x[i])
+
+    x = sequence.pad_sequences(x, maxlen=max_words)
+
+    for id in data.id:
+        if id not in theme_dict:
+            j += 1
+            theme_dict[id] = j
+        y.append(theme_dict[id])
+    y = keras.utils.to_categorical(y, len(theme_dict))
+
     x = np.array(x)
     y = np.array(y)
 
     meta_dict = {
-        'max_words': max_words
+        'max_words': max_words,
+        'unic_words_count': len(tokenizer.word_counts)
     }
 
     np.save(X_ARRAY_FILENAME, x)
@@ -61,7 +65,7 @@ def prepare_data(dataset_filename, w2v_model, dct, tfidf):
     with open(META_DICT_FILENAME, 'wb') as f:
         pickle.dump(meta_dict, f, pickle.HIGHEST_PROTOCOL)
 
-    return x, y, theme_dict, max_words
+    return x, y, theme_dict, max_words, len(tokenizer.word_counts)
 
 
 def load_prepared_data():
@@ -71,10 +75,10 @@ def load_prepared_data():
         theme_dict = pickle.load(f)
     with open(META_DICT_FILENAME, 'rb') as f:
         meta_dict = pickle.load(f)
-    return x, y, theme_dict, meta_dict['max_words']
+    return x, y, theme_dict, meta_dict['max_words'], meta_dict['unic_words_count']
 
 
-def train(w2v_model_vector_size, x, y, max_words, theme_dict_len):
+def train(w2v_model_vector_size, x, y, max_words, theme_dict_len, unic_words_count):
     train_size = int(len(x) * TRAIN_TEST_SPLIT)
     x_train = x[:train_size]
     x_test = x[train_size:]
@@ -82,17 +86,16 @@ def train(w2v_model_vector_size, x, y, max_words, theme_dict_len):
     y_test = y[train_size:]
 
     model = Sequential()
-    model.add(keras.layers.LSTM(100, input_shape=(max_words, w2v_model_vector_size), return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
-    model.add(Activation('relu'))
-    model.add(keras.layers.Flatten())
+    model.add(keras.layers.Embedding(unic_words_count, max_words))
+    model.add(keras.layers.LSTM(32, dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(theme_dict_len))
-    model.add(Activation('softmax'))
-    model.compile(loss='sparse_categorical_crossentropy',
+    model.add(Activation('sigmoid'))
+    model.compile(loss='binary_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
     print(model.summary())
 
-    train_history = model.fit(x_train, y_train, batch_size=128, epochs=2000, validation_data=(x_test, y_test), class_weight='auto')
+    train_history = model.fit(x_train, y_train, batch_size=128, epochs=200, validation_data=(x_test, y_test), class_weight='auto')
     show_history_plot(train_history)
     model.save(NN_MODEL_FILENAME)
 

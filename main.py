@@ -8,9 +8,9 @@ DATASET_FILENAME = 'without_mess.csv'
 def test_nn():
     dct, tfidf = theme_counter.load_tfidf()
     w2v_model = train.load_trained_model()
-    # x, y, theme_dict, max_words = neural_network.prepare_data(DATASET_FILENAME, w2v_model, dct, tfidf)
-    x, y, theme_dict, max_words = neural_network.load_prepared_data()
-    neural_network.train(w2v_model.vector_size, x, y, max_words, len(theme_dict))
+    # x, y, theme_dict, max_words, unic_words_count = neural_network.prepare_data(DATASET_FILENAME, w2v_model, dct, tfidf)
+    x, y, theme_dict, max_words, unic_words_count = neural_network.load_prepared_data()
+    neural_network.train(w2v_model.vector_size, x, y, max_words, len(theme_dict), unic_words_count)
     neural_network.test(x, y)
 
 
