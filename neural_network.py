@@ -8,7 +8,7 @@ from keras.layers import Dense, Dropout, Activation
 from preprocess_udpipe import done_text
 
 
-TRAIN_TEST_SPLIT = 0.8
+TRAIN_TEST_SPLIT = 0.6
 NN_MODEL_FILENAME = 'nn_model/model.h5'
 X_ARRAY_FILENAME = 'nn_model/x_array.npy'
 Y_ARRAY_FILENAME = 'nn_model/y_array.npy'
@@ -47,6 +47,7 @@ def prepare_data(dataset_filename, w2v_model, dct, tfidf):
         y.append(theme_dict[i[0]])
     for i in range(len(x)):
         x[i] = np.pad(x[i], [(0, max_words - len(x[i])), (0, 0)], 'constant', constant_values=.0)
+    y = keras.utils.to_categorical(y, len(theme_dict))
     x = np.array(x)
     y = np.array(y)
 
@@ -82,18 +83,15 @@ def train(w2v_model_vector_size, x, y, max_words, theme_dict_len):
     y_test = y[train_size:]
 
     model = Sequential()
-    model.add(Dense(256, input_shape=(max_words, w2v_model_vector_size)))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.4))
-    model.add(keras.layers.Flatten())
+    model.add(keras.layers.LSTM(32, input_shape=(max_words, w2v_model_vector_size), dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(theme_dict_len))
-    model.add(Activation('softmax'))
-    model.compile(loss='sparse_categorical_crossentropy',
+    model.add(Activation('sigmoid'))
+    model.compile(loss='binary_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
     print(model.summary())
 
-    train_history = model.fit(x_train, y_train, batch_size=128, epochs=2000, validation_data=(x_test, y_test), class_weight='auto')
+    train_history = model.fit(x_train, y_train, batch_size=128, epochs=100, validation_data=(x_test, y_test), class_weight='auto')
     show_history_plot(train_history)
     model.save(NN_MODEL_FILENAME)
 
