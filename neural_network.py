@@ -8,6 +8,7 @@ from keras.layers import Dense, Dropout, Activation
 from preprocess_udpipe import done_text
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing import sequence
+from keras.utils import plot_model
 
 
 TRAIN_TEST_SPLIT = 0.8
@@ -94,6 +95,7 @@ def train(w2v_model_vector_size, x, y, max_words, theme_dict_len, unic_words_cou
                   optimizer='adam',
                   metrics=['accuracy'])
     print(model.summary())
+    plot_model(model, to_file='model.png')
 
     train_history = model.fit(x_train, y_train, batch_size=128, epochs=200, validation_data=(x_test, y_test), class_weight='auto')
     show_history_plot(train_history)
