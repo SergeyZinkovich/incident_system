@@ -22,7 +22,7 @@ def get_data(dataset_filename):
     return data.sample(frac=1).reset_index(drop=True)
 
 
-def prepare_data(dataset_filename, w2v_model, dct, tfidf):
+def prepare_data(dataset_filename, w2v_model):
     data = get_data(dataset_filename)
     theme_dict = {}
     x = []
