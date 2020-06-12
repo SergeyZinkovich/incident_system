@@ -24,7 +24,7 @@ def get_data(dataset_filename):
     return data.sample(frac=1).reset_index(drop=True)
 
 
-def prepare_data(dataset_filename, w2v_model, dct, tfidf):
+def prepare_data(dataset_filename):
     data = get_data(dataset_filename)
     theme_dict = {}
     y = []
@@ -79,7 +79,7 @@ def load_prepared_data():
     return x, y, theme_dict, meta_dict['max_words'], meta_dict['unic_words_count']
 
 
-def train(w2v_model_vector_size, x, y, max_words, theme_dict_len, unic_words_count):
+def train(x, y, max_words, theme_dict_len, unic_words_count):
     train_size = int(len(x) * TRAIN_TEST_SPLIT)
     x_train = x[:train_size]
     x_test = x[train_size:]
@@ -88,16 +88,16 @@ def train(w2v_model_vector_size, x, y, max_words, theme_dict_len, unic_words_cou
 
     model = Sequential()
     model.add(keras.layers.Embedding(unic_words_count, max_words))
-    model.add(keras.layers.LSTM(32, dropout=0.2, recurrent_dropout=0.2))
+    model.add(keras.layers.LSTM(100, dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(theme_dict_len))
     model.add(Activation('sigmoid'))
-    model.compile(loss='binary_crossentropy',
+    model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
     print(model.summary())
     plot_model(model, to_file='model.png')
 
-    train_history = model.fit(x_train, y_train, batch_size=128, epochs=200, validation_data=(x_test, y_test), class_weight='auto')
+    train_history = model.fit(x_train, y_train, batch_size=128, epochs=30, validation_data=(x_test, y_test), class_weight='auto')
     show_history_plot(train_history)
     model.save(NN_MODEL_FILENAME)
 
