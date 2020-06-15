@@ -113,12 +113,53 @@ def test(x, y):
     y_test = y[train_size:]
 
     model = keras.models.load_model(NN_MODEL_FILENAME)
+
+    y_predicted = model.predict(x_test)
+    correct_count = 0
+    confidences = []
+    theme_result_dict = {}
+    predictions_count = 0
+    for i in range(len(y_predicted)):
+        nlargest_id = y_predicted[i].argsort()[-3:]
+        max_predicted_index = nlargest_id[2]
+        max_real_index = np.argmax(y_test[i])
+
+        if max_real_index not in theme_result_dict:
+            theme_result_dict[max_real_index] = [0, 0, 0]
+
+        confidence = abs(y_predicted[i][nlargest_id[2]] - y_predicted[i][nlargest_id[1]])
+
+        if max_predicted_index == max_real_index:
+            confidences.append([confidence, True])
+            correct_count += 1
+            predictions_count += 1
+            theme_result_dict[max_real_index][0] += 1
+        else:
+            confidences.append([confidence, False])
+            predictions_count += 1
+            theme_result_dict[max_real_index][1] += 1
+
+    for i in y_train:
+        theme_result_dict[np.argmax(i)][2] += 1
+    print('Accuracy for themes (theme id/train samples count/accuracy):')
+    for i in theme_result_dict.keys():
+        print(i, ':', theme_result_dict[i][2],
+              theme_result_dict[i][0] / (theme_result_dict[i][0] + theme_result_dict[i][1]))
+
+    confidences.sort(key=lambda a: a[0])
+    print('Confidences (confidence/result)')
+    for i in confidences:
+        print(i)
+
+    accuracy = correct_count / predictions_count
+    print('Manual test accuracy check: ', accuracy)
+
     score = model.evaluate(x_test, y_test, batch_size=128, verbose=1)
-    print('test accuracy: ', score[1])
+    print('NN test accuracy: ', score[1])
 
     model = keras.models.load_model(NN_MODEL_FILENAME)
     score = model.evaluate(x, y, batch_size=128, verbose=1)
-    print('total accuracy: ', score[1])
+    print('NN total accuracy: ', score[1])
 
 
 def show_history_plot(train_history):
