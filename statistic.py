@@ -3,6 +3,13 @@ import theme_counter
 from preprocess_udpipe import done_text
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+import configparser
+
+
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+DATASET_FILENAME = config["DEFAULT"]["DATASET_FILENAME"]
 
 
 def words_for_themes():
@@ -13,7 +20,7 @@ def words_for_themes():
 
 
 def words_for_texts():
-    texts = theme_counter.get_data('file.csv').values
+    texts = theme_counter.get_data(DATASET_FILENAME).values
     model = train.load_trained_model()
     for text in texts:
         words = done_text(str(text[1]))

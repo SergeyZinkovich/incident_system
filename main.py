@@ -1,8 +1,13 @@
 import train
 import theme_counter
 import neural_network
+import configparser
 
-DATASET_FILENAME = 'without_mess.csv'
+
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+DATASET_FILENAME = config["DEFAULT"]["DATASET_FILENAME"]
 
 
 def test_nn():

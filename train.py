@@ -3,9 +3,14 @@ import gensim
 import gensim.models
 from preprocess_udpipe import done_text
 import zipfile
+import configparser
 
-TRAINED_MODEL_FILENAME = 'models/trained_model.model'
-UPDATED_MODEL_FILENAME = 'models/updated_model.model'
+
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+TRAINED_MODEL_FILENAME = config["DEFAULT"]["TRAINED_MODEL_FILENAME"]
+UPDATED_MODEL_FILENAME = config["DEFAULT"]["TRAINED_MODEL_FILENAME"]
 
 
 def get_data(dataset_filename):

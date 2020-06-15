@@ -4,13 +4,18 @@ import pickle
 import scipy.spatial.distance as ds
 import gensim.models
 from gensim.corpora import Dictionary
+import configparser
 
-THEME_DICT_FILENAME = 'obj/theme_dict.pkl'
-REPORT_FILENAME = 'report.csv'
-DICTIONARY_FILENAME = 'obj/model_dict.dict'
-TFIDF_MODEL_FILENAME = 'obj/tfidf_model.model'
-PROCESS_FILENAME = 'process.csv'
-DIRECTION_FILENAME = 'direction.csv'
+
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+THEME_DICT_FILENAME = config["DEFAULT"]["THEME_DICT_FILENAME"]
+REPORT_FILENAME = config["DEFAULT"]["REPORT_FILENAME"]
+DICTIONARY_FILENAME = config["DEFAULT"]["DICTIONARY_FILENAME"]
+TFIDF_MODEL_FILENAME = config["DEFAULT"]["TFIDF_MODEL_FILENAME"]
+PROCESS_FILENAME = config["DEFAULT"]["PROCESS_FILENAME"]
+DIRECTION_FILENAME = config["DEFAULT"]["DIRECTION_FILENAME"]
 
 
 def get_data(dataset_filename):

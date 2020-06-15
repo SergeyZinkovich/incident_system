@@ -3,6 +3,7 @@ import pandas as pd
 import keras
 import pickle
 import matplotlib.pyplot as plt
+import configparser
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Activation
 from preprocess_udpipe import done_text
@@ -11,13 +12,17 @@ from keras.preprocessing import sequence
 from keras.utils import plot_model
 
 
-TRAIN_TEST_SPLIT = 0.8
-NN_MODEL_FILENAME = 'nn_model/model.h5'
-X_ARRAY_FILENAME = 'nn_model/x_array.npy'
-Y_ARRAY_FILENAME = 'nn_model/y_array.npy'
-THEME_DICT_FILENAME = 'nn_model/theme_dict.pkl'
-META_DICT_FILENAME = 'nn_model/meta_dict.pkl'
-TOKENIZER_FILENAME = 'nn_model/tokenizer.pkl'
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+TRAIN_TEST_SPLIT = int(config["DEFAULT"]["TRAIN_TEST_SPLIT"])
+NN_MODEL_FILENAME = config["DEFAULT"]["NN_MODEL_FILENAME"]
+X_ARRAY_FILENAME = config["DEFAULT"]["X_ARRAY_FILENAME"]
+Y_ARRAY_FILENAME = config["DEFAULT"]["Y_ARRAY_FILENAME"]
+THEME_DICT_FILENAME = config["DEFAULT"]["THEME_DICT_FILENAME"]
+META_DICT_FILENAME = config["DEFAULT"]["META_DICT_FILENAME"]
+TOKENIZER_FILENAME = config["DEFAULT"]["TOKENIZER_FILENAME"]
+MODEL_PLOT_FILENAME = config["DEFAULT"]["MODEL_PLOT_FILENAME"]
 
 
 def get_data(dataset_filename):
@@ -98,7 +103,7 @@ def train(x, y, max_words, theme_dict_len, unic_words_count):
                   optimizer='adam',
                   metrics=['accuracy'])
     print(model.summary())
-    plot_model(model, to_file='model.png')
+    plot_model(model, to_file=MODEL_PLOT_FILENAME)
 
     train_history = model.fit(x_train, y_train, batch_size=128, epochs=30, validation_data=(x_test, y_test), class_weight='auto')
     show_history_plot(train_history)

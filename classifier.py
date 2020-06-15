@@ -1,14 +1,19 @@
 import keras
 import numpy as np
 import pickle
+import configparser
 from keras.preprocessing import sequence
 from preprocess_udpipe import done_text
 
-NN_MODEL_FILENAME = 'nn_model/model.h5'
-TRAINED_MODEL_FILENAME = 'models/trained_model.model'
-META_DICT_FILENAME = 'nn_model/meta_dict.pkl'
-THEME_DICT_FILENAME = 'nn_model/theme_dict.pkl'
-TOKENIZER_FILENAME = 'nn_model/tokenizer.pkl'
+
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+NN_MODEL_FILENAME = config["DEFAULT"]["NN_MODEL_FILENAME"]
+TRAINED_MODEL_FILENAME = config["DEFAULT"]["TRAINED_MODEL_FILENAME"]
+META_DICT_FILENAME = config["DEFAULT"]["META_DICT_FILENAME"]
+THEME_DICT_FILENAME = config["DEFAULT"]["THEME_DICT_FILENAME"]
+TOKENIZER_FILENAME = config["DEFAULT"]["TOKENIZER_FILENAME"]
 
 
 def load_tokenizer():
