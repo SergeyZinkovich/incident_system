@@ -17,6 +17,7 @@ X_ARRAY_FILENAME = 'nn_model/x_array.npy'
 Y_ARRAY_FILENAME = 'nn_model/y_array.npy'
 THEME_DICT_FILENAME = 'nn_model/theme_dict.pkl'
 META_DICT_FILENAME = 'nn_model/meta_dict.pkl'
+TOKENIZER_FILENAME = 'nn_model/tokenizer.pkl'
 
 
 def get_data(dataset_filename):
@@ -61,6 +62,8 @@ def prepare_data(dataset_filename):
 
     np.save(X_ARRAY_FILENAME, x)
     np.save(Y_ARRAY_FILENAME, y)
+    with open(TOKENIZER_FILENAME, 'wb') as handle:
+        pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
     with open(THEME_DICT_FILENAME, 'wb') as f:
         pickle.dump(theme_dict, f, pickle.HIGHEST_PROTOCOL)
     with open(META_DICT_FILENAME, 'wb') as f:
