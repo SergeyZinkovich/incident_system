@@ -1,6 +1,13 @@
 /obj/
 /models/
+/data/
+/reports/
+/nn_model/
 *.csv
 /.ipynb_checkpoints/
 /.idea
 *.zip
+*.model
+*.png
+*.pkl
+*.npy
