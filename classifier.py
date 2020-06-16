@@ -2,6 +2,7 @@ import keras
 import numpy as np
 import pickle
 import configparser
+import pandas as pd
 from keras.preprocessing import sequence
 from preprocess_udpipe import done_text
 
@@ -14,6 +15,8 @@ TRAINED_MODEL_FILENAME = config["DEFAULT"]["TRAINED_MODEL_FILENAME"]
 META_DICT_FILENAME = config["DEFAULT"]["META_DICT_FILENAME"]
 THEME_DICT_FILENAME = config["DEFAULT"]["THEME_DICT_FILENAME"]
 TOKENIZER_FILENAME = config["DEFAULT"]["TOKENIZER_FILENAME"]
+PROCESS_FILENAME = config["DEFAULT"]["PROCESS_FILENAME"]
+DIRECTION_FILENAME = config["DEFAULT"]["DIRECTION_FILENAME"]
 
 
 def load_tokenizer():
@@ -41,6 +44,20 @@ def classify(text):
     return theme_dict[np.argmax(y_predicted)]
 
 
+def classify_with_text_theme(text):
+    theme_id = classify(text)
+    process_df = pd.read_csv(PROCESS_FILENAME, encoding='utf-8', delimiter=';')
+    process_dict = {}
+    for i in process_df.values:
+        process_dict[i[0]] = i[1]
+
+    direction_df = pd.read_csv(DIRECTION_FILENAME, encoding='utf-8', delimiter=';')
+    direction_dict = {}
+    for i in direction_df.values:
+        direction_dict[i[0]] = i[1]
+    return process_dict[int(theme_id[:5])] + "/" + direction_dict[int(theme_id[6:])]
+
+
 def prepare_text(text):
     tokenizer = load_tokenizer()
     max_words, unic_words_count = load_metadata()
@@ -55,4 +72,4 @@ def prepare_text(text):
     return x
 
 
-print(classify('"Ошибка проверки возможности регистрации комплекта" Добрый день. 1262571 Сим карта Мегафон с ТП "Включайся! Общайся", (Красноярский край) промо 897010230375489051 +7-923-344-17-25 При попытке зарегистрировать выдает ошибку "Ошибка проверки возможности регистрации комплекта"'))
+print(classify_with_text_theme('"Ошибка проверки возможности регистрации комплекта" Добрый день. 1262571 Сим карта Мегафон с ТП "Включайся! Общайся", (Красноярский край) промо 897010230375489051 +7-923-344-17-25 При попытке зарегистрировать выдает ошибку "Ошибка проверки возможности регистрации комплекта"'))
