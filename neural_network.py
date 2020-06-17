@@ -96,7 +96,7 @@ def train(x, y, max_words, theme_dict_len, unic_words_count):
 
     model = Sequential()
     model.add(keras.layers.Embedding(unic_words_count, max_words))
-    model.add(keras.layers.LSTM(100, dropout=0.2, recurrent_dropout=0.2))
+    model.add(keras.layers.LSTM(220, dropout=0.2, recurrent_dropout=0.2))
     model.add(Dense(theme_dict_len))
     model.add(Activation('sigmoid'))
     model.compile(loss='categorical_crossentropy',
@@ -105,7 +105,7 @@ def train(x, y, max_words, theme_dict_len, unic_words_count):
     print(model.summary())
     plot_model(model, to_file=MODEL_PLOT_FILENAME)
 
-    train_history = model.fit(x_train, y_train, batch_size=128, epochs=30, validation_data=(x_test, y_test), class_weight='auto')
+    train_history = model.fit(x_train, y_train, batch_size=128, epochs=20, validation_data=(x_test, y_test), class_weight='auto')
     show_history_plot(train_history)
     model.save(NN_MODEL_FILENAME)
 

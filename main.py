@@ -11,8 +11,8 @@ DATASET_FILENAME = config["DEFAULT"]["DATASET_FILENAME"]
 
 
 def test_nn():
-    x, y, theme_dict, max_words, unic_words_count = neural_network.prepare_data(DATASET_FILENAME)
-    # x, y, theme_dict, max_words, unic_words_count = neural_network.load_prepared_data()
+    # x, y, theme_dict, max_words, unic_words_count = neural_network.prepare_data(DATASET_FILENAME)
+    x, y, theme_dict, max_words, unic_words_count = neural_network.load_prepared_data()
     neural_network.train(x, y, max_words, len(theme_dict), unic_words_count)
     neural_network.test(x, y)
 

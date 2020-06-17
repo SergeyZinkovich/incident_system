@@ -1,5 +1,6 @@
 import log_disabler
 import keras
+import sys
 import numpy as np
 import pickle
 import configparser
@@ -74,4 +75,4 @@ def prepare_text(text):
 
 
 if __name__ == '__main__':
-    print(classify_with_text_theme('"Ошибка проверки возможности регистрации комплекта" Добрый день. 1262571 Сим карта Мегафон с ТП "Включайся! Общайся", (Красноярский край) промо 897010230375489051 +7-923-344-17-25 При попытке зарегистрировать выдает ошибку "Ошибка проверки возможности регистрации комплекта"'))
+    print(classify_with_text_theme(sys.argv[1]))
