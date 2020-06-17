@@ -15,7 +15,7 @@ from keras.utils import plot_model
 config = configparser.ConfigParser()
 config.read("config.ini")
 
-TRAIN_TEST_SPLIT = int(config["DEFAULT"]["TRAIN_TEST_SPLIT"])
+TRAIN_TEST_SPLIT = float(config["DEFAULT"]["TRAIN_TEST_SPLIT"])
 NN_MODEL_FILENAME = config["DEFAULT"]["NN_MODEL_FILENAME"]
 X_ARRAY_FILENAME = config["DEFAULT"]["X_ARRAY_FILENAME"]
 Y_ARRAY_FILENAME = config["DEFAULT"]["Y_ARRAY_FILENAME"]
